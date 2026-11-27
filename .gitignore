@@ -1,3 +1,9 @@
+# Python / AI Agent
+.venv/
+.env
+__pycache__/
+*.pyc
+
 # Dependencies
 node_modules/
 .pnp

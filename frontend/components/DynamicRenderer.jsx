@@ -98,14 +98,20 @@ export default function DynamicRenderer({ code, formData, onUpdate, onReset }) {
       try {
         await ensureBabel();
 
+        // Strip ES module import/export statements since code runs inside a function wrapper
+        const sanitizedCode = code
+          .replace(/^\s*import\s+[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, "")
+          .replace(/^\s*export\s+default\s+\w+;?\s*$/gm, "");
+
         // Wrap the incoming JSX in a module-style IIFE that returns the component
         const wrapped = `
           const React = arguments[0];
           const { useState, useEffect, useRef, useCallback } = React;
           const motion = arguments[1];
-          ${code}
-          return typeof GeneratedUI !== 'undefined' ? GeneratedUI
-               : typeof UI          !== 'undefined' ? UI
+          ${sanitizedCode}
+          return typeof HealedWizard !== 'undefined' ? HealedWizard
+               : typeof GeneratedUI  !== 'undefined' ? GeneratedUI
+               : typeof UI           !== 'undefined' ? UI
                : null;
         `;
 
@@ -122,7 +128,7 @@ export default function DynamicRenderer({ code, formData, onUpdate, onReset }) {
 
         if (typeof Component !== "function") {
           throw new Error(
-            "Generated code must export a function named `GeneratedUI` or `UI`."
+            "Generated code must define a function named `HealedWizard`, `GeneratedUI`, or `UI`."
           );
         }
 
